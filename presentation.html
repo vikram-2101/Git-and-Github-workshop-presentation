@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Git & GitHub Workshop</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        overflow: hidden;
+      }
+
+      .presentation-container {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .slide {
+        display: none;
+        padding: 2rem;
+        height: calc(100vh - 80px);
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        margin: 1rem;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .slide.active {
+        display: block;
+        animation: slideIn 0.5s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      h1 {
+        color: #2d3748;
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      h2 {
+        color: #4a5568;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 0.5rem;
+      }
+
+      h3 {
+        color: #2d3748;
+        font-size: 1.4rem;
+        margin: 1.5rem 0 1rem 0;
+        position: relative;
+      }
+
+      h3::before {
+        content: "▶";
+        color: #667eea;
+        margin-right: 0.5rem;
+      }
+
+      p {
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+      }
+
+      .highlight {
+        background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+        padding: 0.2rem 0.5rem;
+        border-radius: 5px;
+        font-weight: 600;
+      }
+
+      .code {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 1rem;
+        border-radius: 10px;
+        font-family: "Courier New", monospace;
+        margin: 1rem 0;
+        border-left: 4px solid #667eea;
+        overflow-x: auto;
+      }
+
+      .workflow-diagram {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin: 2rem 0;
+        padding: 2rem;
+        background: linear-gradient(135deg, #74b9ff, #0984e3);
+        border-radius: 15px;
+        color: white;
+      }
+
+      .workflow-step {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        min-width: 150px;
+      }
+
+      .arrow {
+        font-size: 2rem;
+        color: #fff;
+      }
+
+      .activity-box {
+        background: linear-gradient(135deg, #fd79a8, #e84393);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin: 1.5rem 0;
+        border-left: 5px solid #fff;
+      }
+
+      .activity-box h4 {
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+      }
+
+      .git-commands {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+
+      .command-card {
+        background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .command-card h4 {
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+      }
+
+      .command-card code {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.3rem 0.6rem;
+        border-radius: 5px;
+        font-family: "Courier New", monospace;
+      }
+
+      .navigation {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        backdrop-filter: blur(10px);
+      }
+
+      .nav-button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .nav-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .slide-counter {
+        color: white;
+        font-weight: 600;
+      }
+
+      .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+      }
+
+      .benefit-card {
+        background: linear-gradient(135deg, #55efc4, #00b894);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        transform: translateY(0);
+        transition: transform 0.3s ease;
+      }
+
+      .benefit-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .timeline {
+        position: relative;
+        padding: 2rem 0;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 2px;
+      }
+
+      .timeline-item {
+        background: white;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        position: relative;
+        width: 45%;
+      }
+
+      .timeline-item:nth-child(odd) {
+        margin-left: 0;
+      }
+
+      .timeline-item:nth-child(even) {
+        margin-left: 55%;
+      }
+
+      .quiz-section {
+        background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+        padding: 2rem;
+        border-radius: 15px;
+        margin: 2rem 0;
+      }
+
+      .quiz-question {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        border-left: 4px solid #e17055;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="presentation-container">
+      <!-- Slide 1: Title Slide -->
+      <div class="slide active">
+        <h1>Git & GitHub Workshop</h1>
+        <div style="text-align: center; margin: 3rem 0">
+          <div style="font-size: 4rem; margin-bottom: 2rem">🚀</div>
+          <h2 style="border: none; color: #667eea">
+            Master Version Control & Collaboration
+          </h2>
+          <p style="font-size: 1.3rem; color: #666; margin-top: 2rem">
+            From Zero to Git Hero in One Workshop
+          </p>
+        </div>
+
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3 style="margin-bottom: 1rem">🎯 Goal</h3>
+            <p>
+              Make you comfortable with Git version control and collaborative
+              workflows
+            </p>
+          </div>
+          <div class="benefit-card">
+            <h3 style="margin-bottom: 1rem">⏱️ Duration</h3>
+            <p>4-5 hours with hands-on activities</p>
+          </div>
+          <div class="benefit-card">
+            <h3 style="margin-bottom: 1rem">👥 Format</h3>
+            <p>Interactive workshop with practical exercises</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2: Introduction & History -->
+      <div class="slide">
+        <h2>1. Introduction and History</h2>
+        <p><strong>Duration:</strong> 15-20 minutes</p>
+
+        <h3>What is Version Control?</h3>
+        <p>
+          Version control is a system that records changes to files over time so
+          you can recall specific versions later. Think of it as a
+          <span class="highlight">"time machine"</span> for your code!
+        </p>
+
+        <div class="timeline">
+          <div class="timeline-item">
+            <h4>Local VCS</h4>
+            <p>Keep versions on your local machine only</p>
+          </div>
+          <div class="timeline-item">
+            <h4>Centralized VCS</h4>
+            <p>One central server holds all versions (SVN, CVS)</p>
+          </div>
+          <div class="timeline-item">
+            <h4>Distributed VCS</h4>
+            <p>Every clone is a full backup (Git, Mercurial)</p>
+          </div>
+        </div>
+
+        <h3>History of Git</h3>
+        <p>
+          Created by <span class="highlight">Linus Torvalds</span> in 2005 for
+          Linux kernel development. Born out of frustration with existing tools!
+        </p>
+
+        <div class="activity-box">
+          <h4>💭 Quick Discussion</h4>
+          <p>
+            "How do you currently track changes in your code? What problems have
+            you encountered?"
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 3: Why Git & GitHub -->
+      <div class="slide">
+        <h2>Why Git & GitHub?</h2>
+
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3>⚡ Speed</h3>
+            <p>Lightning-fast operations, even with large repositories</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🌐 Distributed</h3>
+            <p>Every clone is a complete backup</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🌿 Branching</h3>
+            <p>Powerful branching and merging capabilities</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🔒 Integrity</h3>
+            <p>Everything is checksummed</p>
+          </div>
+        </div>
+
+        <h3>What is GitHub?</h3>
+        <p>
+          GitHub is a cloud-based platform that hosts Git repositories and adds
+          collaboration features:
+        </p>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+          "
+        >
+          <div
+            style="
+              background: linear-gradient(135deg, #74b9ff, #0984e3);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>🏠 Repository Hosting</h4>
+            <p>Store your code in the cloud</p>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #fd79a8, #e84393);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>👥 Collaboration</h4>
+            <p>Work together with teams</p>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #fdcb6e, #e17055);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>🌍 Open Source</h4>
+            <p>Share and contribute to projects</p>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>🛠️ Extra Features</h4>
+            <p>Issues, PRs, Actions, Pages</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4: Installation & Configuration -->
+      <div class="slide">
+        <h2>2. Git Installation & Configuration</h2>
+        <p><strong>Duration:</strong> 20 minutes</p>
+
+        <h3>Installation</h3>
+        <div class="git-commands">
+          <div class="command-card">
+            <h4>🖥️ Windows</h4>
+            <p>Download from <code>git-scm.com</code></p>
+          </div>
+          <div class="command-card">
+            <h4>🍎 Mac</h4>
+            <code>brew install git</code>
+          </div>
+          <div class="command-card">
+            <h4>🐧 Linux</h4>
+            <code>sudo apt install git</code>
+          </div>
+        </div>
+
+        <h3>Essential Configuration</h3>
+        <div class="code">
+          # Set your identity git config --global user.name "Your Name" git
+          config --global user.email "your.email@example.com" # Check your
+          settings git config --list # Verify installation git --version
+        </div>
+
+        <h3>SSH Keys for GitHub</h3>
+        <div class="code">
+          # Generate SSH key ssh-keygen -t ed25519 -C "your.email@example.com" #
+          Add to SSH agent ssh-add ~/.ssh/id_ed25519 # Copy public key to
+          clipboard cat ~/.ssh/id_ed25519.pub
+        </div>
+
+        <div class="activity-box">
+          <h4>🔧 Hands-On Activity</h4>
+          <p>
+            Set up Git on your machine, configure your identity, and create SSH
+            keys for GitHub authentication.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 5: Git Basics -->
+      <div class="slide">
+        <h2>3. Git Basics</h2>
+        <p><strong>Duration:</strong> 45-60 minutes</p>
+
+        <h3>Git Workflow Concept</h3>
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div style="font-size: 2rem">📁</div>
+            <strong>Working Directory</strong>
+            <p>Your files</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 2rem">📋</div>
+            <strong>Staging Area</strong>
+            <p>Prepared changes</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 2rem">🏛️</div>
+            <strong>Repository</strong>
+            <p>Committed history</p>
+          </div>
+        </div>
+
+        <h3>Essential Commands</h3>
+        <div class="git-commands">
+          <div class="command-card">
+            <h4>Initialize</h4>
+            <code>git init</code>
+          </div>
+          <div class="command-card">
+            <h4>Check Status</h4>
+            <code>git status</code>
+          </div>
+          <div class="command-card">
+            <h4>Add Changes</h4>
+            <code>git add .</code>
+          </div>
+          <div class="command-card">
+            <h4>Commit</h4>
+            <code>git commit -m "message"</code>
+          </div>
+          <div class="command-card">
+            <h4>View History</h4>
+            <code>git log</code>
+          </div>
+          <div class="command-card">
+            <h4>Undo Changes</h4>
+            <code>git restore</code>
+          </div>
+        </div>
+
+        <div class="activity-box">
+          <h4>🛠️ Practice Time</h4>
+          <p>
+            Create a new repository, add some files, stage changes, and make
+            your first commit. Explore the git log to see your history!
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 6: Branching & Merging -->
+      <div class="slide">
+        <h2>4. Branching and Merging</h2>
+        <p><strong>Duration:</strong> 45 minutes</p>
+
+        <h3>Why Branches?</h3>
+        <p>
+          Branches allow you to
+          <span class="highlight"
+            >work on different features simultaneously</span
+          >
+          without affecting the main codebase. Think of branches as parallel
+          universes of your project!
+        </p>
+
+        <div
+          style="
+            background: linear-gradient(135deg, #55efc4, #00b894);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            text-align: center;
+          "
+        >
+          <div style="font-size: 3rem; margin-bottom: 1rem">🌳</div>
+          <h3>Branch Visualization</h3>
+          <p>main ──●──●──●──●</p>
+          <p style="margin-left: 2rem">└─ feature ──●──●──●</p>
+          <p style="margin-left: 4rem">└─ bugfix ──●──●</p>
+        </div>
+
+        <h3>Branch Commands</h3>
+        <div class="git-commands">
+          <div class="command-card">
+            <h4>Create Branch</h4>
+            <code>git branch feature-name</code>
+          </div>
+          <div class="command-card">
+            <h4>Switch Branch</h4>
+            <code>git checkout branch-name</code>
+          </div>
+          <div class="command-card">
+            <h4>Create & Switch</h4>
+            <code>git checkout -b new-branch</code>
+          </div>
+          <div class="command-card">
+            <h4>List Branches</h4>
+            <code>git branch</code>
+          </div>
+          <div class="command-card">
+            <h4>Merge Branch</h4>
+            <code>git merge branch-name</code>
+          </div>
+          <div class="command-card">
+            <h4>Delete Branch</h4>
+            <code>git branch -d branch-name</code>
+          </div>
+        </div>
+
+        <div class="activity-box">
+          <h4>🌿 Branching Exercise</h4>
+          <p>
+            Create a feature branch, make changes, switch back to main, create
+            another branch, then practice merging. We'll intentionally create a
+            merge conflict to learn how to resolve it!
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 7: Remote Repositories -->
+      <div class="slide">
+        <h2>5. Remote Repositories & GitHub</h2>
+        <p><strong>Duration:</strong> 45 minutes</p>
+
+        <h3>What are Remote Repositories?</h3>
+        <p>
+          Remote repositories are
+          <span class="highlight"
+            >versions of your project hosted on the internet or network</span
+          >. They enable collaboration and backup.
+        </p>
+
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div style="font-size: 2rem">💻</div>
+            <strong>Local Repo</strong>
+            <p>Your machine</p>
+          </div>
+          <div class="arrow">↔️</div>
+          <div class="workflow-step">
+            <div style="font-size: 2rem">☁️</div>
+            <strong>GitHub</strong>
+            <p>Remote hosting</p>
+          </div>
+          <div class="arrow">↔️</div>
+          <div class="workflow-step">
+            <div style="font-size: 2rem">👥</div>
+            <strong>Team</strong>
+            <p>Collaborators</p>
+          </div>
+        </div>
+
+        <h3>Remote Commands</h3>
+        <div class="git-commands">
+          <div class="command-card">
+            <h4>Clone Repository</h4>
+            <code>git clone &lt;url&gt;</code>
+          </div>
+          <div class="command-card">
+            <h4>View Remotes</h4>
+            <code>git remote -v</code>
+          </div>
+          <div class="command-card">
+            <h4>Push Changes</h4>
+            <code>git push origin main</code>
+          </div>
+          <div class="command-card">
+            <h4>Pull Changes</h4>
+            <code>git pull origin main</code>
+          </div>
+          <div class="command-card">
+            <h4>Add Remote</h4>
+            <code>git remote add origin &lt;url&gt;</code>
+          </div>
+          <div class="command-card">
+            <h4>Fetch Updates</h4>
+            <code>git fetch origin</code>
+          </div>
+        </div>
+
+        <div class="activity-box">
+          <h4>🔄 Collaboration Exercise</h4>
+          <p>
+            Fork a demo repository, clone it locally, make changes, push back to
+            your fork, and create a Pull Request. Experience the full GitHub
+            workflow!
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 8: Advanced Git -->
+      <div class="slide">
+        <h2>6. Advanced Git Concepts</h2>
+        <p><strong>Duration:</strong> 45-60 minutes</p>
+
+        <h3>Power User Commands</h3>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+          "
+        >
+          <div
+            style="
+              background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>🔄 Rebasing</h4>
+            <code
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 0.5rem;
+                border-radius: 5px;
+                display: block;
+                margin: 1rem 0;
+              "
+              >git rebase main</code
+            >
+            <p>Replay commits on top of another branch</p>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #fd79a8, #e84393);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 10px;
+            "
+          >
+            <h4>📦 Stashing</h4>
+            <code
+              style="
+                background: rgba(0, 0, 0, 0.3);
+                padding: 0.5rem;
+                border-radius: 5px;
+                display: block;
+                margin: 1rem 0;
+              "
+              >git stash</code
+            >
+            <p>Temporarily save uncommitted changes</p>
+          </div>
+        </div>
+
+        <h3>More Advanced Operations</h3>
+        <div class="git-commands">
+          <div class="command-card">
+            <h4>Tag Release</h4>
+            <code>git tag v1.0.0</code>
+          </div>
+          <div class="command-card">
+            <h4>Cherry Pick</h4>
+            <code>git cherry-pick &lt;commit&gt;</code>
+          </div>
+          <div class="command-card">
+            <h4>Reset Hard</h4>
+            <code>git reset --hard HEAD~1</code>
+          </div>
+          <div class="command-card">
+            <h4>Revert Commit</h4>
+            <code>git revert &lt;commit&gt;</code>
+          </div>
+          <div class="command-card">
+            <h4>Interactive Log</h4>
+            <code>git log --oneline --graph</code>
+          </div>
+          <div class="command-card">
+            <h4>Detailed Diff</h4>
+            <code>git diff --stat</code>
+          </div>
+        </div>
+
+        <div class="activity-box">
+          <h4>⚡ Advanced Practice</h4>
+          <p>
+            Practice rebasing feature branches, use stash to temporarily save
+            work, and explore different ways to view your project history.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 9: GitHub Collaboration -->
+      <div class="slide">
+        <h2>7. GitHub Collaboration Features</h2>
+        <p><strong>Duration:</strong> 30-45 minutes</p>
+
+        <h3>Beyond Push & Pull</h3>
+        <p>
+          GitHub adds powerful collaboration tools on top of Git's foundation.
+        </p>
+
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3>🔄 Pull Requests</h3>
+            <p>Propose and review changes before merging</p>
+          </div>
+          <div class="benefit-card">
+            <h3>👁️ Code Reviews</h3>
+            <p>Collaborate on code quality and catch bugs</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🐛 Issues</h3>
+            <p>Track bugs, features, and project tasks</p>
+          </div>
+          <div class="benefit-card">
+            <h3>📋 Projects</h3>
+            <p>Organize work with Kanban boards</p>
+          </div>
+          <div class="benefit-card">
+            <h3>⚙️ Actions</h3>
+            <p>Automate testing and deployment</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🌐 Pages</h3>
+            <p>Host static websites directly from repos</p>
+          </div>
+        </div>
+
+        <h3>Pull Request Workflow</h3>
+        <div class="workflow-diagram">
+          <div class="workflow-step">
+            <div style="font-size: 1.5rem">🍴</div>
+            <strong>Fork</strong>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 1.5rem">💻</div>
+            <strong>Clone</strong>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 1.5rem">🌿</div>
+            <strong>Branch</strong>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 1.5rem">📤</div>
+            <strong>Push</strong>
+          </div>
+          <div class="arrow">→</div>
+          <div class="workflow-step">
+            <div style="font-size: 1.5rem">🔄</div>
+            <strong>PR</strong>
+          </div>
+        </div>
+
+        <div class="activity-box">
+          <h4>🤝 Final Collaboration Exercise</h4>
+          <p>
+            Create a Pull Request on a demo repository, practice code reviews,
+            assign reviewers, and experience the complete GitHub collaboration
+            workflow.
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 10: Best Practices & Tips -->
+      <div class="slide">
+        <h2>Best Practices & Pro Tips</h2>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+          "
+        >
+          <div
+            style="
+              background: linear-gradient(135deg, #55efc4, #00b894);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 15px;
+            "
+          >
+            <h3>📝 Commit Messages</h3>
+            <ul style="list-style: none; padding: 0">
+              <li>✅ "Add user authentication feature"</li>
+              <li>✅ "Fix memory leak in image processing"</li>
+              <li>❌ "Fixed stuff"</li>
+              <li>❌ "WIP"</li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #74b9ff, #0984e3);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 15px;
+            "
+          >
+            <h3>🌿 Branching Strategy</h3>
+            <ul style="list-style: none; padding: 0">
+              <li>✅ main/master - stable code</li>
+              <li>✅ develop - integration branch</li>
+              <li>✅ feature/user-auth</li>
+              <li>✅ hotfix/security-patch</li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+          "
+        >
+          <div
+            style="
+              background: linear-gradient(135deg, #fd79a8, #e84393);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 15px;
+            "
+          >
+            <h3>🔒 Security Tips</h3>
+            <ul style="list-style: none; padding: 0">
+              <li>✅ Use SSH keys for authentication</li>
+              <li>✅ Never commit passwords or API keys</li>
+              <li>✅ Use .gitignore for sensitive files</li>
+              <li>✅ Enable two-factor authentication</li>
+            </ul>
+          </div>
+
+          <div
+            style="
+              background: linear-gradient(135deg, #fdcb6e, #e17055);
+              color: white;
+              padding: 1.5rem;
+              border-radius: 15px;
+            "
+          >
+            <h3>⚡ Performance Tips</h3>
+            <ul style="list-style: none; padding: 0">
+              <li>✅ Use shallow clones for CI</li>
+              <li>✅ Regularly clean up branches</li>
+              <li>✅ Use git lfs for large files</li>
+              <li>✅ Keep repositories focused</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="quiz-section">
+          <h3 style="color: white; text-align: center; margin-bottom: 2rem">
+            🧠 Knowledge Check
+          </h3>
+          <div class="quiz-question">
+            <strong>Q1:</strong> What's the difference between 'git merge' and
+            'git rebase'?
+          </div>
+          <div class="quiz-question">
+            <strong>Q2:</strong> When would you use 'git stash'?
+          </div>
+          <div class="quiz-question">
+            <strong>Q3:</strong> What's the purpose of a Pull Request?
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 11: Common Issues & Solutions -->
+      <div class="slide">
+        <h2>Common Issues & Solutions</h2>
+
+        <h3>🚨 Merge Conflicts</h3>
+        <div
+          style="
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+          "
+        >
+          <h4>Problem:</h4>
+          <p>Two branches modified the same line of code</p>
+          <h4>Solution:</h4>
+          <div class="code" style="background: rgba(0, 0, 0, 0.3)">
+            # Edit the conflicted file manually # Remove conflict markers
+            <<<<<<< ======= >>>>>>> git add conflicted-file.txt git commit -m
+            "Resolve merge conflict"
+          </div>
+        </div>
+
+        <h3>🔄 Undo Last Commit</h3>
+        <div
+          style="
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+          "
+        >
+          <h4>Keep changes in working directory:</h4>
+          <div class="code" style="background: rgba(0, 0, 0, 0.3)">
+            git reset --soft HEAD~1
+          </div>
+          <h4>Discard changes completely:</h4>
+          <div class="code" style="background: rgba(0, 0, 0, 0.3)">
+            git reset --hard HEAD~1
+          </div>
+        </div>
+
+        <h3>🌿 Delete Remote Branch</h3>
+        <div
+          style="
+            background: linear-gradient(135deg, #55efc4, #00b894);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+          "
+        >
+          <div class="code" style="background: rgba(0, 0, 0, 0.3)">
+            # Delete local branch git branch -d feature-branch # Delete remote
+            branch git push origin --delete feature-branch
+          </div>
+        </div>
+
+        <h3>📝 Change Last Commit Message</h3>
+        <div
+          style="
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+          "
+        >
+          <div class="code" style="background: rgba(0, 0, 0, 0.3)">
+            git commit --amend -m "New commit message"
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 12: Resources & Next Steps -->
+      <div class="slide">
+        <h2>Resources & Next Steps</h2>
+
+        <h3>📚 Learning Resources</h3>
+        <div class="benefits-grid">
+          <div class="benefit-card">
+            <h3>📖 Documentation</h3>
+            <p>git-scm.com - Official Git documentation</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🎮 Interactive</h3>
+            <p>learngitbranching.js.org - Visual Git learning</p>
+          </div>
+          <div class="benefit-card">
+            <h3>📚 Books</h3>
+            <p>"Pro Git" by Scott Chacon (free online)</p>
+          </div>
+          <div class="benefit-card">
+            <h3>💻 Practice</h3>
+            <p>GitHub Skills - hands-on courses</p>
+          </div>
+        </div>
+
+        <h3>🚀 Next Steps</h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+          "
+        >
+          <div
+            style="
+              background: linear-gradient(135deg, #74b9ff, #0984e3);
+              color: white;
+              padding: 1rem;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+            "
+          >
+            <span style="font-size: 2rem; margin-right: 1rem">1️⃣</span>
+            <div>
+              <strong>Practice Daily</strong>
+              <p>Use Git for all your projects, even small ones</p>
+            </div>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #fd79a8, #e84393);
+              color: white;
+              padding: 1rem;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+            "
+          >
+            <span style="font-size: 2rem; margin-right: 1rem">2️⃣</span>
+            <div>
+              <strong>Contribute to Open Source</strong>
+              <p>Find beginner-friendly projects on GitHub</p>
+            </div>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #fdcb6e, #e17055);
+              color: white;
+              padding: 1rem;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+            "
+          >
+            <span style="font-size: 2rem; margin-right: 1rem">3️⃣</span>
+            <div>
+              <strong>Explore Advanced Features</strong>
+              <p>Git hooks, submodules, GitHub Actions</p>
+            </div>
+          </div>
+          <div
+            style="
+              background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+              color: white;
+              padding: 1rem;
+              border-radius: 10px;
+              display: flex;
+              align-items: center;
+            "
+          >
+            <span style="font-size: 2rem; margin-right: 1rem">4️⃣</span>
+            <div>
+              <strong>Share Knowledge</strong>
+              <p>Teach others and create documentation</p>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+          "
+        >
+          <h2 style="margin-bottom: 1rem; border: none">🎉 Congratulations!</h2>
+          <p style="font-size: 1.2rem">
+            You're now equipped with Git and GitHub superpowers!
+          </p>
+          <p style="margin-top: 1rem; font-style: italic">
+            "The best way to learn Git is to use Git every day!"
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 13: Thank You -->
+      <div class="slide">
+        <div
+          style="
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <div style="font-size: 5rem; margin-bottom: 2rem">🚀</div>
+          <h1 style="margin-bottom: 2rem">Thank You!</h1>
+          <h2 style="border: none; color: #667eea; margin-bottom: 3rem">
+            Questions & Discussion
+          </h2>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 2rem;
+              width: 100%;
+              max-width: 800px;
+            "
+          >
+            <div
+              style="
+                background: linear-gradient(135deg, #55efc4, #00b894);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 3rem; margin-bottom: 1rem">💬</div>
+              <h3>Ask Questions</h3>
+              <p>No question is too small!</p>
+            </div>
+            <div
+              style="
+                background: linear-gradient(135deg, #74b9ff, #0984e3);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 3rem; margin-bottom: 1rem">🤝</div>
+              <h3>Share Experiences</h3>
+              <p>Tell us about your Git journey</p>
+            </div>
+            <div
+              style="
+                background: linear-gradient(135deg, #fd79a8, #e84393);
+                color: white;
+                padding: 2rem;
+                border-radius: 15px;
+                text-align: center;
+              "
+            >
+              <div style="font-size: 3rem; margin-bottom: 1rem">🌟</div>
+              <h3>Keep Learning</h3>
+              <p>Practice makes perfect!</p>
+            </div>
+          </div>
+
+          <div style="margin-top: 3rem; font-size: 1.2rem; color: #666">
+            <p>Remember: Every Git master was once a beginner!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <button class="nav-button" id="prevBtn" onclick="changeSlide(-1)">
+        ← Previous
+      </button>
+      <span class="slide-counter">
+        <span id="currentSlide">1</span> / <span id="totalSlides">13</span>
+      </span>
+      <button class="nav-button" id="nextBtn" onclick="changeSlide(1)">
+        Next →
+      </button>
+    </div>
+
+    <script>
+      let currentSlideIndex = 0;
+      const slides = document.querySelectorAll(".slide");
+      const totalSlides = slides.length;
+
+      document.getElementById("totalSlides").textContent = totalSlides;
+
+      function showSlide(n) {
+        slides[currentSlideIndex].classList.remove("active");
+        currentSlideIndex = (n + slides.length) % slides.length;
+        slides[currentSlideIndex].classList.add("active");
+
+        document.getElementById("currentSlide").textContent =
+          currentSlideIndex + 1;
+
+        // Update navigation buttons
+        document.getElementById("prevBtn").disabled = currentSlideIndex === 0;
+        document.getElementById("nextBtn").disabled =
+          currentSlideIndex === slides.length - 1;
+      }
+
+      function changeSlide(direction) {
+        showSlide(currentSlideIndex + direction);
+      }
+
+      // Keyboard navigation
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowLeft") {
+          if (currentSlideIndex > 0) changeSlide(-1);
+        } else if (e.key === "ArrowRight") {
+          if (currentSlideIndex < slides.length - 1) changeSlide(1);
+        }
+      });
+
+      // Initialize
+      showSlide(0);
+
+      // Add some interactive hover effects
+      document.querySelectorAll(".benefit-card").forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-8px) scale(1.02)";
+          this.style.boxShadow = "0 20px 40px rgba(0, 0, 0, 0.2)";
+        });
+
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0) scale(1)";
+          this.style.boxShadow = "none";
+        });
+      });
+
+      document.querySelectorAll(".command-card").forEach((card) => {
+        card.addEventListener("mouseenter", function () {
+          this.style.transform = "translateY(-3px)";
+          this.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.15)";
+        });
+
+        card.addEventListener("mouseleave", function () {
+          this.style.transform = "translateY(0)";
+          this.style.boxShadow = "none";
+        });
+      });
+    </script>
+  </body>
+</html>
